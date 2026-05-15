@@ -2,13 +2,16 @@ package dev.deftu.gradle.tools.minecraft
 
 import dev.deftu.gradle.ToolkitConstants
 import dev.deftu.gradle.utils.MCData
+import dev.deftu.gradle.utils.withLoom
 import net.fabricmc.loom.task.RemapJarTask
 import org.gradle.api.Project
-import org.gradle.jvm.tasks.Jar
-import org.gradle.kotlin.dsl.*
-import dev.deftu.gradle.utils.withLoom
-import gradle.kotlin.dsl.accessors._1c8e4fbff5f160d1f2e62cb24fe4a9db.sourceSets
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.SourceSet
+import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.register
 
 abstract class ApiExtension(
     val project: Project
@@ -22,44 +25,47 @@ abstract class ApiExtension(
     private inline val mcData: MCData
         get() = MCData.from(project)
 
+    private inline val sourceSets
+        get() = project.extensions.getByType<JavaPluginExtension>().sourceSets
+
     private inline val sourceSet: SourceSet?
-        get() = project.sourceSets.findByName(SOURCE_SET_NAME)
+        get() = sourceSets.findByName(SOURCE_SET_NAME)
 
     fun setupTestSourceSet() {
-        if (sourceSet != null) {
-            // Don't need to set it up if it already exists
+        if (null != sourceSet) {
             return
         }
 
-        val mainSourceSet = project.sourceSets["main"]
+        val mainSourceSet = sourceSets.getByName("main")
 
-        project.sourceSets.create(SOURCE_SET_NAME) {
+        sourceSets.create(SOURCE_SET_NAME) {
             compileClasspath += mainSourceSet.compileClasspath
             runtimeClasspath += mainSourceSet.runtimeClasspath
         }
 
         project.dependencies {
-            "${SOURCE_SET_NAME}Implementation"(mainSourceSet.output)
-            "${SOURCE_SET_NAME}RuntimeOnly"(mainSourceSet.output)
-            "${SOURCE_SET_NAME}CompileOnly"(mainSourceSet.output)
+            add("${SOURCE_SET_NAME}Implementation", mainSourceSet.output)
+            add("${SOURCE_SET_NAME}RuntimeOnly", mainSourceSet.output)
+            add("${SOURCE_SET_NAME}CompileOnly", mainSourceSet.output)
         }
     }
 
     fun setupTestJar() {
-        val currentSourceSet = sourceSet ?: throw IllegalStateException("Test source set not found")
+        val currentSourceSet = sourceSet
+            ?: throw IllegalStateException("Test source set not found")
 
         val devLibsDir = project.layout.buildDirectory.dir("dev-libs")
 
-        val testJar = project.tasks.register("testJar", Jar::class.java) {
+        val testJar = project.tasks.register<Jar>("testJar") {
             group = ToolkitConstants.TASK_GROUP
 
             archiveClassifier.set("test-mod-dev")
             destinationDirectory.set(devLibsDir)
-            from(project.sourceSets[SOURCE_SET_NAME].output)
+            from(currentSourceSet.output)
         }.get()
 
         if (!mcData.version.isDrop) {
-            val remapTestJar = project.tasks.register("remapTestJar", RemapJarTask::class.java) {
+            val remapTestJar = project.tasks.register<RemapJarTask>("remapTestJar") {
                 group = ToolkitConstants.TASK_GROUP
 
                 archiveClassifier.set("test-mod")
@@ -68,11 +74,11 @@ abstract class ApiExtension(
                 classpath.setFrom(currentSourceSet.compileClasspath)
             }.get()
 
-            project.tasks.named("build").configure {
+            project.tasks.named("build") {
                 dependsOn(remapTestJar)
             }
         } else {
-            project.tasks.named("build").configure {
+            project.tasks.named("build") {
                 dependsOn(testJar)
             }
         }
@@ -82,17 +88,21 @@ abstract class ApiExtension(
         setupTestSourceSet()
         setupTestJar()
 
+        val currentSourceSet = sourceSet
+            ?: throw IllegalStateException("Test source set not found")
+
         project.withLoom {
             runs {
                 create(CLIENT_RUN_NAME) {
                     client()
-                    source(sourceSet)
+                    source(currentSourceSet)
 
                     val configuration = project.configurations.create(CLIENT_RUN_NAME)
+
                     if (!mcData.isFabric) {
                         mods {
                             create(SOURCE_SET_NAME) {
-                                source(sourceSet)
+                                source(currentSourceSet)
                                 configuration(configuration)
                             }
                         }
@@ -106,17 +116,21 @@ abstract class ApiExtension(
         setupTestSourceSet()
         setupTestJar()
 
+        val currentSourceSet = sourceSet
+            ?: throw IllegalStateException("Test source set not found")
+
         project.withLoom {
             runs {
                 create(SERVER_RUN_NAME) {
                     server()
-                    source(sourceSet)
+                    source(currentSourceSet)
 
                     val configuration = project.configurations.create(SERVER_RUN_NAME)
+
                     if (!mcData.isFabric) {
                         mods {
                             create(SOURCE_SET_NAME) {
-                                source(sourceSet)
+                                source(currentSourceSet)
                                 configuration(configuration)
                             }
                         }

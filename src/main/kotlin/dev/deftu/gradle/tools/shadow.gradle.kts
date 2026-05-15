@@ -4,10 +4,13 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import dev.deftu.gradle.ToolkitConstants
 import dev.deftu.gradle.utils.MCData
 import dev.deftu.gradle.utils.ModData
-import org.gradle.jvm.tasks.Jar
 import dev.deftu.gradle.utils.withLoom
 import dev.deftu.gradle.utils.withLoomPlugin
-import gradle.kotlin.dsl.accessors._1c8e4fbff5f160d1f2e62cb24fe4a9db.remapJar
+import net.fabricmc.loom.task.RemapJarTask
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.tasks.bundling.DuplicatesStrategy
+import org.gradle.jvm.tasks.Jar
 
 plugins {
     java
@@ -21,6 +24,7 @@ val fatJar = tasks.register<ShadowJar>("fatJar") {
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     configurations.add(shade)
+
     archiveVersion.set(project.version.toString())
     archiveClassifier.set("all")
 
@@ -28,34 +32,48 @@ val fatJar = tasks.register<ShadowJar>("fatJar") {
     val jarTask = project.tasks.getByName("jar") as Jar
 
     manifest.from(jarTask.manifest)
-    val libsProvider = project.provider { listOf(jarTask.manifest.attributes["Class-Path"]) }
+
+    val libsProvider = project.provider {
+        listOf(jarTask.manifest.attributes["Class-Path"])
+    }
+
     val files = project.objects.fileCollection().from(shade)
+
     doFirst {
         if (!files.isEmpty) {
             val libs = libsProvider.get().toMutableList()
+
             libs.addAll(files.map { it.name })
-            manifest.attributes(mapOf("Class-Path" to libs.filterNotNull().joinToString(" ")))
+
+            manifest.attributes(
+                mapOf(
+                    "Class-Path" to libs.filterNotNull().joinToString(" ")
+                )
+            )
         }
     }
 
     from(javaPlugin.sourceSets.getByName("main").output)
-    exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "module-info.class")
+
+    exclude(
+        "META-INF/INDEX.LIST",
+        "META-INF/*.SF",
+        "META-INF/*.DSA",
+        "META-INF/*.RSA",
+        "module-info.class"
+    )
 }
 
 project.artifacts.add("shade", fatJar)
 
 pluginManager.withPlugin("java") {
-    tasks["assemble"].dependsOn(fatJar)
+    tasks.named("assemble") {
+        dependsOn(fatJar)
+    }
 }
 
 pluginManager.withLoomPlugin {
-    // Set up a non-transitive version of the shade configuration for parity with Loom's `include` configuration.
-    // This is mostly only for use with our own `includeOrShade` configuration, which chooses one of the two
-    // depending on the mod loader and Minecraft version currently in use. Certain versions may not support
-    // Jar-in-Jar which is what `include` uses, and it does NOT shade as a fallback. Thus, meaning our Shadow
-    // plugin is still useful. Using them interchangeably with an extended configuration such as `includeOrShade`
-    // is useful for that exact reason.
-    val shadeNonTransitive by configurations.creating {
+    val shadeNonTransitive: Configuration by configurations.creating {
         isCanBeConsumed = false
         isCanBeResolved = true
         isTransitive = false
@@ -68,7 +86,8 @@ pluginManager.withLoomPlugin {
 
 tasks {
     val shadowJar = findByName("shadowJar")
-    if (shadowJar != null) {
+
+    if (null != shadowJar) {
         named("shadowJar") {
             doFirst {
                 throw GradleException("Incorrect task! You're looking for fatJar.")
@@ -80,31 +99,29 @@ tasks {
 withLoom {
     val mcData = MCData.from(project)
 
-    tasks {
-        if (mcData.version.isDrop) {
-            // Unlike below, we no longer need to remap, so our fatJar is our final JAR.
+    if (mcData.version.isDrop) {
+        fatJar.configure {
+            archiveClassifier.set("")
 
-            fatJar {
-                archiveClassifier.set("")
+            val modData = ModData.from(project)
 
-                val modData = ModData.from(project)
-                archiveBaseName.set(modData.name)
-            }
-        } else {
-            // We need to make the fatJar first, that being our new deobfuscated "dev" JAR with all dependencies shaded in.
-            // Then, we input THAT into the remapJar task to get the final mod JAR with all of our dependencies.
+            archiveBaseName.set(modData.name)
+        }
+    } else {
+        fatJar.configure {
+            archiveClassifier.set("dev")
+        }
 
-            fatJar {
-                archiveClassifier.set("dev")
-            }
+        tasks.named<RemapJarTask>("remapJar") {
+            dependsOn(fatJar)
 
-            remapJar {
-                inputFile.set(fatJar.get().archiveFile)
-                archiveClassifier.set("")
+            inputFile.set(fatJar.flatMap { it.archiveFile })
 
-                val modData = ModData.from(project)
-                archiveBaseName.set(modData.name)
-            }
+            archiveClassifier.set("")
+
+            val modData = ModData.from(project)
+
+            archiveBaseName.set(modData.name)
         }
     }
 }

@@ -1,5 +1,7 @@
 package dev.deftu.gradle.utils.mcinfo
 
+import dev.deftu.gradle.utils.version.MinecraftVersions
+
 class MinecraftInfoV5 : MinecraftInfo() {
     override fun initialize() {
         inherit(MinecraftInfoV4())

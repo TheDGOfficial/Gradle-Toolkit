@@ -1,7 +1,7 @@
 package dev.deftu.gradle.tools
 
 import dev.deftu.gradle.utils.*
-import gradle.kotlin.dsl.accessors._1c8e4fbff5f160d1f2e62cb24fe4a9db.base
+import org.gradle.api.plugins.BasePluginExtension
 
 val gitData = GitData.from(project)
 val mcData = MCData.from(project)
@@ -24,7 +24,7 @@ if (modData.isPresent) {
     applyProjectInfo(modData, "mod") {
         tasks {
             if (isLoomPresent() && !mcData.version.isDrop) {
-                named<org.gradle.jvm.tasks.Jar>("remapJar") {
+                named<Jar>("remapJar") {
                     archiveBaseName.set(modData.name)
                 }
             } else {
@@ -80,9 +80,11 @@ fun applyProjectInfo(info: ProjectInfo, prefix: String, setupBlock: () -> Unit) 
 
     if (propertyBoolOr("$prefix.name.setup", true)) {
         pluginManager.withPlugin("base") {
-            base.archivesName.set(info.name)
+            extensions.configure(BasePluginExtension::class.java) {
+                archivesName.set(info.name)
+            }
         }
 
-        setupBlock.invoke()
+        setupBlock()
     }
 }
