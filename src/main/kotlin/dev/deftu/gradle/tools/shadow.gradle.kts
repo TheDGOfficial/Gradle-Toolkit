@@ -9,7 +9,6 @@ import dev.deftu.gradle.utils.withLoomPlugin
 import net.fabricmc.loom.task.RemapJarTask
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.api.tasks.bundling.DuplicatesStrategy
 import org.gradle.jvm.tasks.Jar
 
 plugins {
