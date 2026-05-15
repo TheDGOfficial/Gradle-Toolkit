@@ -94,7 +94,7 @@ dependencies {
         minecraft(propertyOr("loom.minecraft", "com.mojang:minecraft:${mcData.version}"))
     }
 
-    if (propertyBoolOr("loom.mappings.use", true)) {
+    if (propertyBoolOr("loom.mappings.use", true) && !mcData.version.isDrop) {
         fun Dependency?.applyExclusions() {
             check(this != null && this is ModuleDependency)
             exclude(module = "fabric-loader")

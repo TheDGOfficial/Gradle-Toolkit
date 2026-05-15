@@ -1,11 +1,22 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-    kotlin("jvm") version("2.3.0")
+    kotlin("jvm") version("2.3.21")
     `kotlin-dsl`
-    val dgtVersion = "2.70.0"
+    val dgtVersion = "2.73.0"
     id("dev.deftu.gradle.tools.repo") version(dgtVersion)
     id("dev.deftu.gradle.tools.configure") version(dgtVersion)
     id("dev.deftu.gradle.tools.publishing.maven") version(dgtVersion)
     id("dev.deftu.gradle.tools.publishing.github") version(dgtVersion)
+}
+
+tasks.withType<JavaCompile> {
+  options.release = 25
+}
+
+tasks.withType<KotlinJvmCompile> {
+  compilerOptions.jvmTarget.set(JvmTarget.JVM_25)
 }
 
 toolkitGitHubPublishing {
@@ -38,7 +49,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:${property("kotlin.version")}")
 
     // Architectury Loom
-    implementation("gg.essential:architectury-loom:1.13.44")
+    implementation("gg.essential:architectury-loom:1.15.50")
     implementation("dev.architectury:architectury-pack200:0.1.3")
 
     // Preprocessing/multi-versioning

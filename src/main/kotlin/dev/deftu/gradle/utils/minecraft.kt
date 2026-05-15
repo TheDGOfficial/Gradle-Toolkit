@@ -34,7 +34,6 @@ val JavaVersion.minecraftJavaVersion: String
         JavaVersion.VERSION_16 -> "JAVA_16"
         JavaVersion.VERSION_17 -> "JAVA_17"
         JavaVersion.VERSION_21 -> "JAVA_21"
-        JavaVersion.VERSION_24 -> "JAVA_24"
         JavaVersion.VERSION_25 -> "JAVA_25"
         else -> "UNKNOWN"
     }
