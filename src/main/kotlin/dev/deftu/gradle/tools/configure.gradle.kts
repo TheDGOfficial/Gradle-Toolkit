@@ -24,7 +24,7 @@ if (modData.isPresent) {
     applyProjectInfo(modData, "mod") {
         tasks {
             if (isLoomPresent() && !mcData.version.isDrop) {
-                named<Jar>("remapJar") {
+                named<org.gradle.jvm.tasks.Jar>("remapJar") {
                     archiveBaseName.set(modData.name)
                 }
             } else {
