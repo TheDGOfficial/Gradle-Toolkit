@@ -8,8 +8,6 @@ plugins {
     val dgtVersion = "2.73.0"
     id("dev.deftu.gradle.tools.repo") version(dgtVersion)
     id("dev.deftu.gradle.tools.configure") version(dgtVersion)
-    id("dev.deftu.gradle.tools.publishing.maven") version(dgtVersion)
-    id("dev.deftu.gradle.tools.publishing.github") version(dgtVersion)
 }
 
 tasks.withType<JavaCompile> {
