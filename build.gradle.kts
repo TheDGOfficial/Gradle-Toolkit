@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.gradle.api.publish.maven.MavenPublication
 
 plugins {
     kotlin("jvm") version("2.3.20")
@@ -20,14 +21,35 @@ tasks.withType<KotlinJvmCompile> {
 }
 
 toolkitGitHubPublishing {
-    owner.set("Deftu")
-    repository.set("Gradle-Toolkit")
-    automaticallyGenerateReleaseNotes.set(true)
-    useSourcesJar.set(true)
+    setupPublication.set(false)
 }
 
 toolkitMavenPublishing {
     setupPublication.set(false)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("pluginMaven") {
+            from(components["java"])
+
+            groupId = project.group.toString()
+            artifactId = project.name
+            version = project.version.toString()
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/TheDGOfficial/Gradle-Toolkit")
+
+            credentials {
+                username = (project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")).toString()
+                password = (project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")).toString()
+            }
+        }
+    }
 }
 
 repositories {

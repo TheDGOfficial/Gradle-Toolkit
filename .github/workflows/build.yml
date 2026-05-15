@@ -22,6 +22,10 @@ on:
       - ".gitattributes"
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -53,3 +57,9 @@ jobs:
           path: |
             build/libs/*.jar
             versions/*/build/libs/*.jar
+
+      - name: publish to GitHub Packages
+        if: github.event_name == 'push'
+        run: ./gradlew publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
