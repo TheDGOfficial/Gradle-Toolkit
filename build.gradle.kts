@@ -21,24 +21,13 @@ tasks.withType<KotlinJvmCompile> {
 }
 
 publishing {
-    publications {
-        create<MavenPublication>("pluginMaven") {
-            from(components["java"])
-
-            groupId = project.group.toString()
-            artifactId = project.name
-            version = project.version.toString()
-        }
-    }
-
     repositories {
         maven {
-            name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/TheDGOfficial/Gradle-Toolkit")
 
             credentials {
-                username = (project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")).toString()
-                password = (project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")).toString()
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
             }
         }
     }
