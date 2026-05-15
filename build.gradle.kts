@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.gradle.api.publish.maven.MavenPublication
 
 plugins {
-    kotlin("jvm") version("2.3.20")
+    kotlin("jvm") version("2.3.0")
     `kotlin-dsl`
     val dgtVersion = "2.73.0"
     id("dev.deftu.gradle.tools.repo") version(dgtVersion)
