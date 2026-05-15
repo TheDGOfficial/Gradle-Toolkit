@@ -1,4 +1,4 @@
-name: Build with Gradle
+name: build
 
 on:
   push:
@@ -25,7 +25,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Build with Gradle
     steps:
       - name: checkout repository
         uses: actions/checkout@v6

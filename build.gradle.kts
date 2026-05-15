@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    kotlin("jvm") version("2.3.21")
+    kotlin("jvm") version("2.3.20")
     `kotlin-dsl`
     val dgtVersion = "2.73.0"
     id("dev.deftu.gradle.tools.repo") version(dgtVersion)
@@ -31,15 +31,13 @@ toolkitMavenPublishing {
 }
 
 repositories {
-    maven("https://jitpack.io/")
+    gradlePluginPortal()
+    mavenCentral()
+
     maven("https://maven.fabricmc.net/")
     maven("https://maven.minecraftforge.net/")
     maven("https://maven.architectury.dev/")
-    maven("https://maven.jab125.dev/")
-
-    mavenCentral()
-    gradlePluginPortal()
-    mavenLocal()
+    maven("https://jitpack.io/")
 }
 
 dependencies {
