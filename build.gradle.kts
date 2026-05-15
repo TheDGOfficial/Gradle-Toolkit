@@ -20,10 +20,6 @@ tasks.withType<KotlinJvmCompile> {
   compilerOptions.jvmTarget.set(JvmTarget.JVM_25)
 }
 
-toolkitGitHubPublishing {
-    setupPublication.set(false)
-}
-
 toolkitMavenPublishing {
     setupPublication.set(false)
 }
