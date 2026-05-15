@@ -27,7 +27,7 @@ val fatJar = tasks.register<ShadowJar>("fatJar") {
     val javaPlugin = project.extensions.getByType(JavaPluginExtension::class.java)
     val jarTask = project.tasks.getByName("jar") as Jar
 
-    manifest.inheritFrom(jarTask.manifest)
+    manifest.from(jarTask.manifest)
     val libsProvider = project.provider { listOf(jarTask.manifest.attributes["Class-Path"]) }
     val files = project.objects.fileCollection().from(shade)
     doFirst {

@@ -32,10 +32,6 @@ abstract class ApiExtension(
         }
 
         val mainSourceSet = project.sourceSets["main"]
-        if (mainSourceSet == null) {
-            project.logger.warn("Main source set not found, skipping test source set setup")
-            return
-        }
 
         project.sourceSets.create(SOURCE_SET_NAME) {
             compileClasspath += mainSourceSet.compileClasspath

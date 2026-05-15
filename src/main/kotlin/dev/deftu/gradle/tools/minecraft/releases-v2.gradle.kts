@@ -83,7 +83,6 @@ fun setupModrinth(token: String) {
                 DependencyType.OPTIONAL -> com.modrinth.minotaur.dependencies.DependencyType.OPTIONAL
                 DependencyType.INCOMPATIBLE -> com.modrinth.minotaur.dependencies.DependencyType.INCOMPATIBLE
                 DependencyType.EMBEDDED -> com.modrinth.minotaur.dependencies.DependencyType.EMBEDDED
-                else -> throw IllegalArgumentException("Could not map DGT dependency type to Minotaur")
             }
 
             ModDependency(dependencyProjectId, type)
@@ -130,7 +129,6 @@ fun setupCurseForge(token: String) {
                     DependencyType.OPTIONAL -> addOptional(dependencyProjectId)
                     DependencyType.INCOMPATIBLE -> addIncompatibility(dependencyProjectId)
                     DependencyType.EMBEDDED -> addEmbedded(dependencyProjectId)
-                    else -> throw IllegalStateException("Could not attain CurseForge dependency type for $dependencyProjectId")
                 }
             }
         }

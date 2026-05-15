@@ -41,7 +41,7 @@ data class GitData(
         fun fetchCurrentBranch(project: Project): String {
             return try {
                 val output = project.execIgnorable("git", "rev-parse", "--abbrev-ref", "HEAD")
-                val string = output.toString().trim()
+                val string = output.trim()
                 if (string.isEmpty() || string.startsWith("fatal")) "" else string
             } catch (e: Exception) {
                 project.logger.error("Failed to fetch git branch", e)
@@ -54,7 +54,7 @@ data class GitData(
         fun fetchCurrentCommit(project: Project): String {
             return try {
                 val output = project.execIgnorable("git", "rev-parse", "HEAD")
-                val string = output.toString().trim()
+                val string = output.trim()
                 if (string.isEmpty() || string.startsWith("fatal")) "" else string.substring(0, 7)
             } catch (e: Exception) {
                 project.logger.error("Failed to fetch git commit", e)
@@ -67,7 +67,7 @@ data class GitData(
         fun fetchCurrentUrl(project: Project): String? {
             return try {
                 val output = project.execIgnorable("git", "config", "--get", "remote.origin.url")
-                val string = output.toString().trim()
+                val string = output.trim()
                 if (string.isEmpty() || string.startsWith("fatal")) "" else string
             } catch (e: Exception) {
                 project.logger.error("Failed to fetch git url", e)
