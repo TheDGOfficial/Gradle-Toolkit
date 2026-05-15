@@ -8,6 +8,8 @@ plugins {
     val dgtVersion = "2.73.0"
     id("dev.deftu.gradle.tools.repo") version(dgtVersion)
     id("dev.deftu.gradle.tools.configure") version(dgtVersion)
+    `java-gradle-plugin`
+    `maven-publish`
 }
 
 tasks.withType<JavaCompile> {
@@ -16,10 +18,6 @@ tasks.withType<JavaCompile> {
 
 tasks.withType<KotlinJvmCompile> {
   compilerOptions.jvmTarget.set(JvmTarget.JVM_25)
-}
-
-toolkitMavenPublishing {
-    setupPublication.set(false)
 }
 
 publishing {
